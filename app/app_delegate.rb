@@ -2,9 +2,10 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
 
-    viewController = GLViewController.alloc.initWithNibName(nil, bundle:nil)
-    @window.rootViewController = viewController
+    viewController = MonkeyViewController.alloc.initWithNibName(nil, bundle:nil)
     @window.addSubview(viewController.view)
+    viewController.preferredFramesPerSecond = 60
+    @window.rootViewController = viewController
     @window.makeKeyAndVisible()
     true
   end

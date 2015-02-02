@@ -12,8 +12,10 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'motion-ogl'
 
-  app.frameworks << 'OpenGLES'
+  app.frameworks << 'Foundation'
+  app.frameworks << 'UIKit'
   app.frameworks << 'QuartzCore'
+  app.frameworks << 'OpenGLES'
   app.frameworks << 'GLKit'
 
   app.entitlements['get-task-allow'] = true
