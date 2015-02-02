@@ -38,7 +38,7 @@ class WavefrontMesh
     glVertexAttribPointer(normalAttr, FLOATS_PER_VECTOR, GL_FLOAT, GL_FALSE, BYTES_PER_ELEMENT,
                           Pointer.magic_cookie(BYTES_PER_VECTOR))
 
-    glDrawElements(GL_TRIANGLES, @indices.count, GL_UNSIGNED_BYTE, Pointer.magic_cookie(0))
+    glDrawElements(GL_TRIANGLES, @indices.count, GL_UNSIGNED_INT, Pointer.magic_cookie(0))
 
     glBindBuffer(GL_ARRAY_BUFFER, 0)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
@@ -83,7 +83,7 @@ class WavefrontMesh
     @indexHandle = glGenBuffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, @indexHandle)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, @indices.count * BYTES_PER_INT,
-                 to_ptr(:uchar, @indices), GL_STATIC_DRAW)
+                 to_ptr(:uint, @indices), GL_STATIC_DRAW)
   end
 
   def parse_point line

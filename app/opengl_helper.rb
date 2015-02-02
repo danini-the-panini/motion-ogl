@@ -12,4 +12,11 @@ module OpenGLHelper
     end
     pointer
   end
+
+  def matrix_ptr matrix
+    Pointer.new(GLKMatrix4.type).tap do |ptr|
+      ptr.assign matrix
+      ptr.cast!(:float)
+    end
+  end
 end
