@@ -20,6 +20,7 @@ class MonkeyViewController < GLKViewController
     end
     self.view.context = @context
     setupGL
+    surfaceCreated
   end
 
   def viewDidUnload
@@ -31,8 +32,14 @@ class MonkeyViewController < GLKViewController
     @context = nil
   end
 
-  def glkView(view, drawInRect:rect)
+  def surfaceCreated
+    glClearColor(0, 0, 0, 1)
+    glEnable(GL_DEPTH_TEST)
+    glEnable(GL_CULL_FACE)
+  end
 
+  def glkView(view, drawInRect:rect)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   end
 
   def update
