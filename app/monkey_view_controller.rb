@@ -9,6 +9,7 @@ class MonkeyViewController < GLKViewController
 
   def loadView
     self.view = GLKView.alloc.initWithFrame(UIScreen.mainScreen.bounds)
+    self.view.drawableDepthFormat = GLKViewDrawableDepthFormat24
   end
 
   def setupGL
@@ -76,6 +77,7 @@ class MonkeyViewController < GLKViewController
 
   def glkView(view, drawInRect:rect)
     glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
     glEnable(GL_CULL_FACE)
     glCullFace(GL_BACK)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
