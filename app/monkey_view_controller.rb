@@ -1,6 +1,8 @@
 include OpenGLHelper
 
 class MonkeyViewController < GLKViewController
+  TOUCH_SCALE_FACTOR = 0.5625
+  PINCH_SCALE_FACTOR = 1
 
   def loadView
     self.view = GLKView.alloc.initWithFrame(UIScreen.mainScreen.bounds)
@@ -23,6 +25,7 @@ class MonkeyViewController < GLKViewController
     self.view.context = @context
     setupGL
     surfaceCreated
+    viewDidLayoutSubviews
   end
 
   def viewDidUnload
@@ -41,7 +44,7 @@ class MonkeyViewController < GLKViewController
   end
 
   def surfaceCreated
-    glClearColor(0, 0, 0, 1)
+    glClearColor(0, 1, 1, 1)
 
     @mesh = WavefrontMesh.new pathForResource('monkey.obj')
     @shader = Shader.new pathForResource('vertex.glsl'), pathForResource('fragment.glsl')
@@ -50,13 +53,13 @@ class MonkeyViewController < GLKViewController
     @shader.load.use
 
     colorHandle = glGetUniformLocation(@shader.handle, "vColor")
-    glUniform4fv(colorHandle, 1, to_ptr(:float, [1.0, 0.0, 1.0, 1.0]))
+    glUniform4fv(colorHandle, 1, to_ptr(:float, [1.0, 0.0, 0.0, 1.0]))
 
     @worldHandle = glGetUniformLocation(@shader.handle, "world")
     @projHandle = glGetUniformLocation(@shader.handle, "projection")
     @viewHandle = glGetUniformLocation(@shader.handle, "view")
 
-    @viewAngle = 0.0
+    @camera = Camera.new
   end
 
   def surfaceChanged width, height
@@ -64,8 +67,8 @@ class MonkeyViewController < GLKViewController
 
     ratio = width.to_f / height.to_f
 
-    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(60.0), ratio, 0.1, 100.0)
-    glUniformMatrix4fv(@projHandle, 1, GL_FALSE, matrix_ptr(projectionMatrix))
+    @projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(60.0), ratio, 0.1, 100.0)
+    glUniformMatrix4fv(@projHandle, 1, GL_FALSE, matrix_ptr(@projectionMatrix))
   end
 
   def glkView(view, drawInRect:rect)
@@ -74,33 +77,46 @@ class MonkeyViewController < GLKViewController
     glCullFace(GL_BACK)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+    viewMatrix = GLKMatrix4MakeLookAt(0,5,0,0,0,0,0,1,0)#@camera.view_matrix
     glUniformMatrix4fv(@viewHandle, 1, GL_FALSE, matrix_ptr(viewMatrix))
 
-    worldMatrix = GLKMatrix4Identity
-    glUniformMatrix4fv(@worldHandle, 1, GL_FALSE, matrix_ptr(worldMatrix))
+    glUniformMatrix4fv(@worldHandle, 1, GL_FALSE, matrix_ptr(GLKMatrix4Identity))
 
     @mesh.draw(@shader)
   end
 
   def update
-    @viewAngle += 2.0
   end
 
   def didReceiveMemoryWarning
     super
   end
 
-  private
-  def viewMatrix
-    x = 5.0 * Math::cos(GLKMathDegreesToRadians @viewAngle)
-    y = 5.0 * Math::sin(GLKMathDegreesToRadians @viewAngle)
-    GLKMatrix4MakeLookAt(
-      x, 0.0, y,
-      0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0
-    )
+  def touchesBegan touches, withEvent: event
+    location = touches.anyObject.locationInView(self.view)
+    @prevX = location.x
+    @prevY = location.y
   end
 
+  def touchesMoved touches, withEvent: event
+    location = touches.anyObject.locationInView(self.view)
+
+    dx = location.x - @prevX
+    dy = location.y - @prevY
+
+    @camera.orbit(dx * TOUCH_SCALE_FACTOR, dy * TOUCH_SCALE_FACTOR)
+
+    @prevX = location.x
+    @prevY = location.y
+  end
+
+  def touchesEnded touches, withEvent: event
+  end
+
+  def touchesCancelled touches, withEvent: event
+  end
+
+  private
   def pathForResource file
     ext = File.extname file
     name = File.basename file, ext

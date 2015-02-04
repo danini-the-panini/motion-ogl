@@ -19,4 +19,20 @@ module OpenGLHelper
       ptr.cast!(:float)
     end
   end
+
+  def ptr_to object
+    Pointer.new(object.class.type).tap do |p|
+      p.assign object
+    end
+  end
+
+  def vec4_to_arr v
+    p = GLKHelper.GLKVector4ToArray(ptr_to(v))
+    4.times.map { |i| p[i] }
+  end
+
+  def vec3_to_arr v
+    p = GLKHelper.GLKVector3ToArray(ptr_to(v))
+    3.times.map { |i| p[i] }
+  end
 end
