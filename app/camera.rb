@@ -15,7 +15,7 @@ class Camera
   end
 
   def orbit dx, dy
-    newDy = dy
+    newDy = -dy
 
     gimbalRemainingCos = (-@dir).dot(@up)
     gimbalRemaining = to_deg(Math::acos(abs(gimbalRemainingCos)))
@@ -30,7 +30,7 @@ class Camera
     end
 
     m = Matrices.rotate(to_rad(newDy), @right)
-    m *= Matrices.rotate(to_rad(-dx), Vec3.new(0.0, 1.0, 0.0))
+    m *= Matrices.rotate(to_rad(dx), Vec3.new(0.0, 1.0, 0.0))
     d2 = Vec4.with_vec3(@dir) % m
 
     @eye = @at - (d2.xyz.normalize * dist)
