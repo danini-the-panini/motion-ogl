@@ -13,26 +13,17 @@ module OpenGLHelper
     pointer
   end
 
-  def matrix_ptr matrix
-    Pointer.new(GLKMatrix4.type).tap do |ptr|
-      ptr.assign matrix
-      ptr.cast!(:float)
-    end
+  def to_rad x
+    GLKMathDegreesToRadians x
+  end
+
+  def to_deg x
+    GLKMathRadiansToDegrees x
   end
 
   def ptr_to object
     Pointer.new(object.class.type).tap do |p|
       p.assign object
     end
-  end
-
-  def vec4_to_arr v
-    p = GLKHelper.GLKVector4ToArray(ptr_to(v))
-    4.times.map { |i| p[i] }
-  end
-
-  def vec3_to_arr v
-    p = GLKHelper.GLKVector3ToArray(ptr_to(v))
-    3.times.map { |i| p[i] }
   end
 end

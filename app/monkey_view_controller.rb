@@ -4,6 +4,9 @@ class MonkeyViewController < GLKViewController
   TOUCH_SCALE_FACTOR = 0.5625
   PINCH_SCALE_FACTOR = 1
 
+  MAT4_ZERO = Mat4.from_diagonal 0.0
+  MAT4_IDENTITY = Mat4.from_diagonal 1.0
+
   def loadView
     self.view = GLKView.alloc.initWithFrame(UIScreen.mainScreen.bounds)
   end
@@ -59,7 +62,7 @@ class MonkeyViewController < GLKViewController
     @projHandle = glGetUniformLocation(@shader.handle, "projection")
     @viewHandle = glGetUniformLocation(@shader.handle, "view")
 
-    @camera = Camera.new
+    @camera = Camera.new 5.0, 0.0, 0.0
   end
 
   def surfaceChanged width, height
@@ -67,8 +70,8 @@ class MonkeyViewController < GLKViewController
 
     ratio = width.to_f / height.to_f
 
-    @projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(60.0), ratio, 0.1, 100.0)
-    glUniformMatrix4fv(@projHandle, 1, GL_FALSE, matrix_ptr(@projectionMatrix))
+    @projectionMatrix = Matrices.perspective(60.0, ratio, 0.1, 100.0)
+    glUniformMatrix4fv(@projHandle, 1, GL_FALSE, @projectionMatrix.ptr)
   end
 
   def glkView(view, drawInRect:rect)
@@ -77,10 +80,9 @@ class MonkeyViewController < GLKViewController
     glCullFace(GL_BACK)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    viewMatrix = GLKMatrix4MakeLookAt(0,5,0,0,0,0,0,1,0)#@camera.view_matrix
-    glUniformMatrix4fv(@viewHandle, 1, GL_FALSE, matrix_ptr(viewMatrix))
+    glUniformMatrix4fv(@viewHandle, 1, GL_FALSE, @camera.view_matrix.ptr)
 
-    glUniformMatrix4fv(@worldHandle, 1, GL_FALSE, matrix_ptr(GLKMatrix4Identity))
+    glUniformMatrix4fv(@worldHandle, 1, GL_FALSE, MAT4_IDENTITY.ptr)
 
     @mesh.draw(@shader)
   end

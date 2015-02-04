@@ -17,8 +17,6 @@ Motion::Project::App.setup do |app|
   app.frameworks << 'OpenGLES'
   app.frameworks << 'GLKit'
 
-  app.vendor_project('wrappers/GLKHelper', :static)
-
   app.entitlements['get-task-allow'] = true
 
   app.codesign_certificate = ENV["RUBY_MOTION_CODESIGN_CERTIFICATE"]
