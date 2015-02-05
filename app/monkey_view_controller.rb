@@ -10,6 +10,8 @@ class MonkeyViewController < GLKViewController
   def loadView
     self.view = GLKView.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     self.view.drawableDepthFormat = GLKViewDrawableDepthFormat24
+    setup_recognizer UIPanGestureRecognizer.alloc.initWithTarget self, action: 'handlePan:'
+    setup_recognizer UIPinchGestureRecognizer.alloc.initWithTarget self, action: 'handlePinch:'
   end
 
   def setupGL
@@ -64,6 +66,7 @@ class MonkeyViewController < GLKViewController
     @viewHandle = glGetUniformLocation(@shader.handle, "view")
 
     @camera = Camera.new 5.0, 0.0, 0.0
+    @lastScale = 1.0
   end
 
   def surfaceChanged width, height
@@ -96,28 +99,18 @@ class MonkeyViewController < GLKViewController
     super
   end
 
-  def touchesBegan touches, withEvent: event
-    location = touches.anyObject.locationInView(self.view)
-    @prevX = location.x
-    @prevY = location.y
+  def handlePan gr
+    t = gr.translationInView(self.view)
+    @camera.orbit(t.x * TOUCH_SCALE_FACTOR, t.y * TOUCH_SCALE_FACTOR)
+    gr.setTranslation [0.0, 0.0], inView:self.view
   end
 
-  def touchesMoved touches, withEvent: event
-    location = touches.anyObject.locationInView(self.view)
-
-    dx = location.x - @prevX
-    dy = location.y - @prevY
-
-    @camera.orbit(dx * TOUCH_SCALE_FACTOR, dy * TOUCH_SCALE_FACTOR)
-
-    @prevX = location.x
-    @prevY = location.y
-  end
-
-  def touchesEnded touches, withEvent: event
-  end
-
-  def touchesCancelled touches, withEvent: event
+  def handlePinch gr
+    if gr.state == UIGestureRecognizerStateBegan
+      @lastScale = gr.scale
+    end
+    @camera.zoom (1 + (1 - (gr.scale / @lastScale)))
+    @lastScale = gr.scale
   end
 
   private
@@ -126,5 +119,10 @@ class MonkeyViewController < GLKViewController
     name = File.basename file, ext
 
     NSBundle.mainBundle.pathForResource(name, ofType: ext)
+  end
+
+  def setup_recognizer r
+    r.setDelegate self
+    self.view.addGestureRecognizer r
   end
 end
