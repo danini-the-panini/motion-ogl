@@ -10,6 +10,7 @@ end
 
 Motion::Project::App.setup do |app|
   app.name = 'motion-ogl'
+  app.deployment_target= '8.3'
 
   app.frameworks << 'Foundation'
   app.frameworks << 'UIKit'
